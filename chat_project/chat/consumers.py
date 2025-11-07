@@ -3,6 +3,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from .models import Message
+from asgiref.sync import sync_to_async
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -34,8 +36,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         message = data['message']
 
-        # Guardar mensaje en base de datos
-        await self.save_message(self.user.username, self.other_username, message)
+        # Guardar mensaje en base de datos (sin decorador)
+        await sync_to_async(self.save_message)(self.user.username, self.other_username, message)
 
         # Enviar mensaje al grupo
         await self.channel_layer.group_send(
@@ -55,7 +57,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'timestamp': event['timestamp']
         }))
 
-    @database_sync_to_async
+    # Método síncrono sin decorador
     def save_message(self, sender_username, recipient_username, content):
         sender = User.objects.get(username=sender_username)
         recipient = User.objects.get(username=recipient_username)
