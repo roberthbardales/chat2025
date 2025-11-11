@@ -91,16 +91,38 @@
         <h3>Usuarios disponibles para chatear:</h3>
         <ul class="user-list">
             {% for user in users %}
-                <li class="user-item">
-                    <a href="{% url 'chat_room' user.username %}">{{ user.username }}</a>
-                </li>
-            {% empty %}
-                <li class="empty-state">
-                    <p>😔 No hay otros usuarios registrados aún.</p>
-                    <p>Invita a tus amigos a registrarse para comenzar a chatear.</p>
-                </li>
+            <li class="user-item">
+                <a href="{% url 'chat_room' user.username %}">{{ user.username }}</a>
+                <span id="status-{{ user.id }}" style="margin-left:10px; color:white; padding:3px 8px; border-radius:5px; font-size:12px; background: {% if user.is_online %}green{% else %}red{% endif %}">
+                    {% if user.is_online %}● En línea{% else %}● Offline{% endif %}
+                </span>
+            </li>
             {% endfor %}
+
         </ul>
     </div>
+    <script>
+        function actualizarEstados() {
+            fetch("{% url 'chat_home' %}?json=1")
+                .then(response => response.json())
+                .then(data => {
+                    for (const userId in data) {
+                        const span = document.getElementById("status-" + userId);
+                        if (span) {
+                            if (data[userId]) {
+                                span.textContent = "● En línea";
+                                span.style.background = "green";
+                            } else {
+                                span.textContent = "● Offline";
+                                span.style.background = "red";
+                            }
+                        }
+                    }
+                });
+        }
+
+        // Llamamos la función cada 5 segundos
+        setInterval(actualizarEstados, 5000);
+        </script>
 </body>
 </html>

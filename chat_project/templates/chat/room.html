@@ -125,9 +125,10 @@
     <div class="chat-container">
         <div id="chat-log">
             {% for message in messages %}
-                <div class="message {% if message.sender == user %}sent{% else %}received{% endif %}">
+                <div class="message {% if message.sender.username == user.username %}sent{% else %}received{% endif %}">
                     <strong>{{ message.sender.username }}</strong>
-                    {{ message.content }}
+                    <p>{{ message.content }}</p>
+                    <span class="timestamp">{{ message.formatted_time }}</span>
                 </div>
             {% endfor %}
         </div>
